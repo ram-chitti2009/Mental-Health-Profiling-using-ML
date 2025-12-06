@@ -45,7 +45,7 @@ SAVE_DIR = "/content/drive/MyDrive/CAPTURE"
 
 print("Loading saved model from:", MODEL_PATH)
 
-checkpoint = torch.load(MODEL_PATH, map_location='cpu')
+checkpoint = torch.load(MODEL_PATH, map_location='cpu', weights_only=False)
 
 #recreate the autoencoder architecture
 activation_map = {'ReLU': nn.ReLU, 'Tanh': nn.Tanh, 'Sigmoid': nn.Sigmoid}
