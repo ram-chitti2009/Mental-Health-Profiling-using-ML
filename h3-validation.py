@@ -5,26 +5,24 @@ Tests if profile membership is associated with therapy utilization(chisq, cramer
 
 
 
-from google.colab import drive
-from sklearn.model_selection import train_test_split
-drive.mount('/content/drive')
-
 import os
 import pickle
 import numpy as np
 import pandas as pd
 from scipy.stats import chi2_contingency
+from sklearn.model_selection import train_test_split
 
 RANDOM_SEED = 42
-H3_DATA_PATH = "/content/drive/MyDrive/CAPTURE/h3_data.pkl"
-DATASET_PATH = "/content/D1_Swiss_processed.csv"
+# Local paths (run on CPU / local env)
+H3_DATA_PATH = "h3_data.pkl"
+DATASET_PATH = "D1_Swiss_processed.csv"
 
 
 print("="*70)
 print("H3 VALIDATION: Testing Clinical Utility of Profiles")
 print("="*70)
 print("Hypothesis H3: Profile membership is associated with therapy utilization")
-print("Using FULL dataset (train+val+test) for maximum statistical analysis")
+print("Using HELD-OUT TEST SET ONLY to avoid double-dipping")
 print("="*70)
 
 print("Loading H3 data...")
@@ -46,7 +44,7 @@ if "PSYT_Therapy_Use" not in df.columns:
 
 y_therapy = df["PSYT_Therapy_Use"].values
 
-#spli therapy data the same way we did the train+val+test split for the h3 data use the same seed
+# split therapy data the same way we did the train+val+test split for the h3 data; use the same seed
 
 print("Splitting therapy data...")
 train_val_therapy, test_therapy = train_test_split(
@@ -55,20 +53,16 @@ train_val_therapy, test_therapy = train_test_split(
     random_state=RANDOM_SEED
 )
 
-y_therapy_aligned = np.concatenate([train_val_therapy, test_therapy])
-all_cluster_labels = np.concatenate([
-    h3_data['cluster_labels_all'],
-    h3_data['test_cluster_assignments']
-])
+# Use ONLY held-out test set to avoid data leakage / double-dipping
+test_cluster_labels = h3_data['test_cluster_assignments']
+assert len(test_cluster_labels) == len(test_therapy), "Misalignment between test clusters and test therapy labels"
+print(f"\n✓ Test data aligned: {len(test_cluster_labels)} samples (held-out)")
+print(f"  Therapy use rate (test): {test_therapy.mean():.2%} ({test_therapy.sum()}/{len(test_therapy)})")
 
-assert len(y_therapy_aligned) == len(all_cluster_labels), "Misalignment"
-print(f"\n✓ Data aligned: {len(all_cluster_labels)} samples")
-print(f"  Therapy use rate: {y_therapy_aligned.mean():.2%} ({y_therapy_aligned.sum()}/{len(y_therapy_aligned)})")
-
-#create contingency table for chi2 test
+# create contingency table for chi2 test (held-out only)
 print("\nChi-Square Test for Independence:")
 print("="*70)
-contingency = pd.crosstab(all_cluster_labels, y_therapy_aligned)
+contingency = pd.crosstab(test_cluster_labels, test_therapy)
 chi2, p, dof, expected = chi2_contingency(contingency)
 
 print("   Contingency Table:")
@@ -143,7 +137,7 @@ if not has_significant_deviation:
 print("\n" + "="*70)
 print("H3 VALIDATION SUMMARY:")
 print("="*70)
-print(f"Dataset: {h3_data['dataset_name']} (N={len(all_cluster_labels)})")
+print(f"Dataset: {h3_data['dataset_name']} (Held-out test N={len(test_cluster_labels)})")
 print(f"Chi-square: X^2 = {chi2:.4f}, p = {p:.6f}, df = {dof}")
 print(f"Cramér's V = {cramers_v:.4f} ({effect_size} effect)")
 print(f"H3 Status: {' VALIDATED' if p < alpha else ' NOT VALIDATED'}")
