@@ -1724,11 +1724,11 @@ def extract_narrowed_ranges(scout_results):
 print("Ram")
 
 
-study_d3, scout_result3 = run_scout_phase(dataset_name="D3_Academic_Processed")
-narrowed_params_3 = extract_narrowed_ranges(scout_result3)
-result_d3 = run_autoencoder_pipeline(
-    dataset_name="D3_Academic_Processed",
-    narrowed_params=narrowed_params_3
+study_d4, scout_result4 = run_scout_phase(dataset_name="D4_Tech_Processed")
+narrowed_params_4 = extract_narrowed_ranges(scout_result4)
+result_d4 = run_autoencoder_pipeline(
+    dataset_name="D4_Tech_Processed",
+    narrowed_params=narrowed_params_4
 )
 
 # Save results to persistent storage
@@ -1743,27 +1743,27 @@ print("="*80)
 # Save scout results
 scout_file = results_dir / "scout_d3_results.json"
 with open(scout_file, 'w') as f:
-    json.dump(scout_result3, f, indent=2)
+    json.dump(scout_result4, f, indent=2)
 print(f"✓ Scout results saved: {scout_file}")
 
 # Save narrowed parameters
-params_file = results_dir / "narrowed_params_d3.json"
+params_file = results_dir / "narrowed_params_d4.json"
 with open(params_file, 'w') as f:
-    json.dump(narrowed_params_3, f, indent=2)
+    json.dump(narrowed_params_4, f, indent=2)
 print(f"✓ Narrowed params saved: {params_file}")
 
 # Save final pipeline results
 result_to_save = {
-    'dataset': 'D3_Academic_Processed',
-    'best_k': result_d3['best_k'],
-    'best_latent_dim': result_d3['best_latent_dim'],
-    'final_sil_score': float(result_d3['final_sil_score']),
-    'final_ch_score': float(result_d3['final_ch_score']),
-    'final_db_score': float(result_d3['final_db_score']),
-    'reconstruction_loss': float(result_d3['reconstruction_loss']),
+    'dataset': 'D4_Tech_Processed',
+    'best_k': result_d4['best_k'],
+    'best_latent_dim': result_d4['best_latent_dim'],
+    'final_sil_score': float(result_d4['final_sil_score']),
+    'final_ch_score': float(result_d4['final_ch_score']),
+    'final_db_score': float(result_d4['final_db_score']),
+    'reconstruction_loss': float(result_d4['reconstruction_loss']),
 }
 
-config_file = results_dir / "best_config_d3.json"
+config_file = results_dir / "best_config_d4.json"
 with open(config_file, 'w') as f:
     json.dump(result_to_save, f, indent=2)
 print(f"✓ Best config saved: {config_file}")
@@ -1775,11 +1775,4 @@ print("="*80)
 print(json.dumps(result_to_save, indent=2))
 print("="*80)
 print(f"\nFiles saved to: {results_dir}/")
-print("  - scout_d3_results.json")
-print("  - narrowed_params_d3.json") 
-print("  - best_config_d3.json")
-print("\nTo download from RunPod:")
-print("1. Go to RunPod → Your Pod → File Manager")
-print("2. Navigate to /workspace/results/")
-print("3. Download the JSON files")
 print("="*80)
